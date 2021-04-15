@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 
+#include "record.h"
 
 int main () {
    FILE* fileIn;
@@ -13,32 +14,28 @@ int main () {
       printf("Error al leer el archivo 'hashTable.bin'");
       return -1;
    }
-   
-   struct record {
-      int sourceId;
-      int destId;
-      int hourOfDay;
-      float meanTravelTime;
-   };
 
+   record_t *head = malloc(sizeof(record_t));
+   record_t *recordAux = head;
 
-   struct record *recordAux = malloc(sizeof(struct record));
+   while (recordAux->next != NULL) {
+      fread(&recordAux->sourceId, sizeof(recordAux->sourceId), 1, fileIn);
+      fread(&recordAux->destId, sizeof(recordAux->destId), 1, fileIn);
+      fread(&recordAux->hourOfDay, sizeof(recordAux->hourOfDay), 1, fileIn);
+      fread(&recordAux->meanTravelTime, sizeof(recordAux->meanTravelTime), 1, fileIn);
+      fread(&recordAux->next, sizeof(recordAux->next), 1, fileIn);
+      recordAux = recordAux->next; 
+   }
 
-   fread(&recordAux->sourceId, sizeof(recordAux->sourceId), 1, fileIn);
-   fread(&recordAux->destId, sizeof(recordAux->destId), 1, fileIn);
-   fread(&recordAux->hourOfDay, sizeof(recordAux->hourOfDay), 1, fileIn);
-   fread(&recordAux->meanTravelTime, sizeof(recordAux->meanTravelTime), 1, fileIn);
+   record_t *temp = head;
 
-   printf("%d %d %d %f\n", recordAux->sourceId, recordAux->destId, recordAux->hourOfDay, recordAux->meanTravelTime);
+   while(temp->next != NULL) {
+      printf("%d %d %d %f\n", temp->sourceId, temp->destId, temp->hourOfDay, temp->meanTravelTime);
+      printf("%p\n", &temp->next);
+      temp = temp->next;
+   }
 
-   fread(&recordAux->sourceId, sizeof(recordAux->sourceId), 1, fileIn);
-   fread(&recordAux->destId, sizeof(recordAux->destId), 1, fileIn);
-   fread(&recordAux->hourOfDay, sizeof(recordAux->hourOfDay), 1, fileIn);
-   fread(&recordAux->meanTravelTime, sizeof(recordAux->meanTravelTime), 1, fileIn);
-   
-   printf("%d %d %d %f\n", recordAux->sourceId, recordAux->destId, recordAux->hourOfDay, recordAux->meanTravelTime);
-
-   free(recordAux);
+   free(head);
    fclose(fileIn);
 
    return 0;

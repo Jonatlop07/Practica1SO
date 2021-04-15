@@ -2,15 +2,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "record.h"
+
 #define MAX_SIZE 1000
          
-struct record {
-   int sourceId;
-   int destId;
-   int hourOfDay;
-   float meanTravelTime;
-};
-
 int main () {
    
    FILE* fileIn;   
@@ -19,7 +14,8 @@ int main () {
    char line[MAX_SIZE];
    char* token;
 
-   fileIn = fopen("./unprocessedData.csv", "r");
+   //fileIn = fopen("./unprocessedData.csv", "r");
+   fileIn = fopen("./hashTableIn.csv", "r");
    fileOut = fopen("./hashTable.bin", "wb");
 
    if (fileIn == NULL) {
@@ -27,46 +23,84 @@ int main () {
       return -1;
    }
 
+   int id = 0;
    int i = 0;
 
-   while(/*!feof(fileIn)*/i < 4) {
+   record_t *mainRecord = (record_t *) malloc(sizeof(record_t)); 
+
+   while(!feof(fileIn)) {
       fgets(line, MAX_SIZE, fileIn);
 
       token = strtok(line, ","); 
-
-      struct record currRecord; 
-
+      
+      record_t *currRecord = (record_t *) malloc(sizeof(record_t)); 
+     
       int j = 0;
 
       while(token != NULL && j <= 3) {
          switch (j) {
             case 0:
-               currRecord.sourceId = atoi(token); 
+               currRecord->sourceId = atoi(token); 
                break;
             case 1:
-               currRecord.destId = atoi(token);
+               currRecord->destId = atoi(token);
                break;
             case 2:
-               currRecord.hourOfDay = atoi(token);
+               currRecord->hourOfDay = atoi(token);
                break;
             case 3:
-               currRecord.meanTravelTime = atol(token);
+               currRecord->meanTravelTime = atol(token);
                break;
          }
+
+         currRecord->next = NULL;
 
          token = strtok(NULL, ",");
 
          ++j;
       }
 
-      printf("Current record: %d %d %d %f\n", currRecord.sourceId,
-                currRecord.destId, currRecord.hourOfDay, currRecord.meanTravelTime);
+      if (i == 0) { 
+         memcpy(mainRecord, currRecord, sizeof(record_t));
+      }
+
+      if (i > 0 && mainRecord->sourceId == currRecord->sourceId) {
+
+         record_t *temp = mainRecord;
+
+         while (temp->next) {
+            temp = temp->next;
+         }
+         
+         temp->next = (record_t *) malloc(sizeof(record_t)); 
+         memcpy(temp->next, currRecord, sizeof(record_t)); 
+      }
       
-      fwrite(&currRecord, sizeof(currRecord), 1, fileOut);
+      free(currRecord);
 
       i++;
    }
+  
+   record_t *temp = mainRecord;
 
+   while(temp != NULL) {
+      printf("Current: %d %d %d %f\n", temp->sourceId, temp->destId, temp->hourOfDay, temp->meanTravelTime);
+
+      recordRead_t toWrite;
+      toWrite.sourceId = temp->sourceId;
+      toWrite.destId = temp->destId;
+      toWrite.hourOfDay = temp->hourOfDay;
+      toWrite.meanTravelTime = temp->meanTravelTime;
+
+      fwrite(&toWrite, sizeof(toWrite), 1, fileOut);
+      temp = temp->next;
+   }
+
+   printf("NULL\n");
+
+   free( temp );
+   free( mainRecord );
+   
    fclose( fileIn ); 
    fclose( fileOut );
 
