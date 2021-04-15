@@ -20,7 +20,7 @@ int main () {
    char* token;
 
    fileIn = fopen("./unprocessedData.csv", "r");
-   fileOut = fopen("./hashTable.txt", "w");
+   fileOut = fopen("./hashTable.bin", "wb");
 
    if (fileIn == NULL) {
       printf("Error al leer el archivo 'unprocessedData'");
@@ -62,10 +62,13 @@ int main () {
       printf("Current record: %d %d %d %f\n", currRecord.sourceId,
                 currRecord.destId, currRecord.hourOfDay, currRecord.meanTravelTime);
       
+      fwrite(&currRecord, sizeof(currRecord), 1, fileOut);
+
       i++;
    }
 
    fclose( fileIn ); 
+   fclose( fileOut );
 
    return 0;
 }
