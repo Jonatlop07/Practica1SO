@@ -8,13 +8,12 @@
 int main () {
    FILE* fileIn;
 
-   fileIn = fopen("./hashTable.bin", "rb");
+   fileIn = fopen("./hashTable.txt", "r");
 
    if (fileIn == NULL) {
-      printf("Error al leer el archivo 'hashTable.bin'");
+      printf("Error al leer el archivo 'hashTable.txt'");
       return -1;
    }
-
    record_t *head = malloc(sizeof(record_t));
    record_t *recordAux = head;
 
@@ -27,14 +26,13 @@ int main () {
       recordAux = recordAux->next; 
    }
 
-   record_t *temp = head;
 
+   record_t *temp = head;
    while(temp->next != NULL) {
       printf("%d %d %d %f\n", temp->sourceId, temp->destId, temp->hourOfDay, temp->meanTravelTime);
       printf("%p\n", &temp->next);
       temp = temp->next;
    }
-
    free(head);
    fclose(fileIn);
 
