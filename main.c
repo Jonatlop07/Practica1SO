@@ -8,32 +8,23 @@
 int main () {
    FILE* fileIn;
 
-   fileIn = fopen("./hashTable.txt", "r");
+   fileIn = fopen("./hashTable.bin", "rb");
 
    if (fileIn == NULL) {
-      printf("Error al leer el archivo 'hashTable.txt'");
+      printf("Error al leer el archivo 'hashTable.bin'");
       return -1;
    }
-   record_t *head = malloc(sizeof(record_t));
-   record_t *recordAux = head;
 
-   while (recordAux->next != NULL) {
-      fread(&recordAux->sourceId, sizeof(recordAux->sourceId), 1, fileIn);
-      fread(&recordAux->destId, sizeof(recordAux->destId), 1, fileIn);
-      fread(&recordAux->hourOfDay, sizeof(recordAux->hourOfDay), 1, fileIn);
-      fread(&recordAux->meanTravelTime, sizeof(recordAux->meanTravelTime), 1, fileIn);
-      fread(&recordAux->next, sizeof(recordAux->next), 1, fileIn);
-      recordAux = recordAux->next; 
+   recordRead_t aux;
+   
+   int i = 0;
+
+   while (!feof(fileIn)) {
+      fread(&aux, sizeof(recordRead_t), 1, fileIn);
+      printf("%d: %d %d %d %f \n", i+1, aux.sourceId, aux.destId, aux.hourOfDay, aux.meanTravelTime);
+      ++i;
    }
 
-
-   record_t *temp = head;
-   while(temp->next != NULL) {
-      printf("%d %d %d %f\n", temp->sourceId, temp->destId, temp->hourOfDay, temp->meanTravelTime);
-      printf("%p\n", &temp->next);
-      temp = temp->next;
-   }
-   free(head);
    fclose(fileIn);
 
    return 0;
