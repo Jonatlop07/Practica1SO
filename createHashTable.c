@@ -62,9 +62,7 @@ int main () {
 
       if (i == 0) { 
          memcpy(mainRecord, currRecord, sizeof(record_t));
-      }
-
-      if (i > 0 && mainRecord->sourceId == currRecord->sourceId) {
+      } else {
 
          record_t *temp = mainRecord;
 

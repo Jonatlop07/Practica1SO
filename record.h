@@ -1,6 +1,9 @@
-typedef struct recordLinkedList {
-   record_t * head;
-}
+typedef struct recordRead {
+   int sourceId;
+   int destId;
+   int hourOfDay;
+   float meanTravelTime;
+} recordRead_t;
 
 typedef struct record {
    int sourceId;
@@ -10,9 +13,8 @@ typedef struct record {
    struct record *next;
 } record_t;
 
-typedef struct recordRead {
-   int sourceId;
-   int destId;
-   int hourOfDay;
-   float meanTravelTime;
-} recordRead_t;
+typedef struct recordLinkedList {
+   record_t * head;
+} record_ll_t;
+
+
