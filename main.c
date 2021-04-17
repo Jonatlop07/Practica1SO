@@ -15,7 +15,7 @@ int main () {
    recordRead_t aux;
    
    int r, hash;
-   int sourceId = 2, destId = 152, hod = 12;
+   int sourceId = 3, destId = 478, hod = 0;
    int notFound = FALSE;
 
    fileInHashTable = fopen( "./hashTable.bin", "rb" );
@@ -56,19 +56,18 @@ int main () {
       r = fread( &aux, sizeof( aux ), 1, fileInProcessedData );
 
       if ( r < 0 ) {
-         perror( "Error al leer en el archivo 'processedData.bin'");
+         perror( "Error al leer en el archivo 'processedData.bin'" );
          return -1;
       }
 
       if ( sourceId != aux.sourceId || feof( fileInProcessedData ) ) {
-         printf("%d", aux.sourceId);
          notFound = TRUE;
          break;
       }
 
    } while ( destId != aux.destId || hod != aux.hourOfDay );
 
-   if ( notFound ) printf("NA\n");
+   if ( notFound ) printf( "NA\n" );
    else printf( "Tiempo de viaje medio: %f\n", aux.meanTravelTime );
 
    fclose( fileInHashTable );

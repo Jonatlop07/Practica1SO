@@ -4,8 +4,7 @@
 #include "record.h"
 
 #define MAX_LINE_SIZE 1000
-//#define MAX_SOURCE_ID 1160
-#define MAX_SOURCE_ID 4
+#define MAX_SOURCE_ID 1160
 #define MAX_ATTR_NEEDED 4
 #define SOURCE_ID 0
 #define DEST_ID 1
@@ -22,7 +21,7 @@ void freeLinkedList ( record_t **head ) {
    }
 }
 
-record_t *addRecord ( record_t **list, record_t newRecord ) {
+void addRecord ( record_t **list, record_t newRecord ) {
 
    if ( *list == NULL ) {
 
@@ -38,8 +37,6 @@ record_t *addRecord ( record_t **list, record_t newRecord ) {
       aux->next = ( record_t * ) malloc( sizeof( record_t ) );
       *aux->next = newRecord;
    }
-
-   return *list;
 }
 
 
@@ -70,9 +67,17 @@ int main () {
       return -1;
    }
 
-   while( !feof( fileIn ) ) {
+   // Read and ignore the line of column names
+   fgets( line, MAX_LINE_SIZE, fileIn );
+
+   while( 1 ) {
 
       fgets( line, MAX_LINE_SIZE, fileIn );
+      
+      if ( feof( fileIn ) ) {
+          break;
+      }
+
       token = strtok( line, "," );
 
       attrRead = 0;
