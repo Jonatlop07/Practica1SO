@@ -35,7 +35,6 @@ record_t *addRecord(record_t **list, record_t newRecord){
 
       aux->next = (record_t *) malloc(sizeof(record_t));
       *aux->next = newRecord;
-      //printf("Added: %d %d %d %f\n", aux->next->sourceId, aux->next->destId, aux->next->hourOfDay, aux->next->meanTravelTime);
    }
    return *list;
 }
@@ -92,15 +91,6 @@ int main () {
 
       record_t *currList = addRecord(&hashTable[currRecord.sourceId - 1], currRecord);
 
-      /*record_t *temp = currList;
-
-      int k = 1;
-
-      while(temp != NULL) {
-         printf("Current %d: %d %d %d %f\n", k, temp->sourceId, temp->destId, temp->hourOfDay, temp->meanTravelTime);
-         temp = temp->next;
-         ++k;
-      }*/
    }
    for(int i=0;i<1160;i++){
       record_t *temp = hashTable[i];
@@ -119,7 +109,6 @@ int main () {
          fwrite(&toWrite, sizeof(toWrite), 1, fileOut);
          temp = temp->next;
          ++j;
-         //printf("NULL\n");
       }
    }
 
