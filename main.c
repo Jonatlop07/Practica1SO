@@ -40,7 +40,7 @@ int main () {
 
    r = fread( &hash, sizeof( hash ), 1, fileInHashTable );
    
-   if ( r < 0 ) {
+   if ( r <= 0 ) {
       perror( "Error al leer en el archivo 'hashTable.bin'" );
       return -1;
    }
@@ -55,7 +55,7 @@ int main () {
    do {
       r = fread( &aux, sizeof( aux ), 1, fileInProcessedData );
 
-      if ( r < 0 ) {
+      if ( r <= 0 ) {
          perror( "Error al leer en el archivo 'processedData.bin'" );
          return -1;
       }
