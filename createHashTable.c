@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "record.h"
 
-#define MAX_LINE_SIZE 1000
+#define MAX_LINE_SIZE 150
 #define MAX_SOURCE_ID 1160
 #define MAX_ATTR_NEEDED 4
 #define SOURCE_ID 0
