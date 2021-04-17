@@ -2,30 +2,83 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
-
 #include "record.h"
 
 int main () {
-   FILE* fileIn;
 
-   fileIn = fopen("./hashTable.bin", "rb");
+   FILE* fileInHashTable;
+   FILE* fileInProcessedData;
+   
+   recordRead_t aux;
+   
+   int i = 1, r, hash;
+   int sourceId = 3, destId = 477, hod = 0;
+   int notFound = 0;
 
-   if (fileIn == NULL) {
-      printf("Error al leer el archivo 'hashTable.bin'");
+   fileInHashTable = fopen( "./hashTable.bin", "rb" );
+   fileInProcessedData = fopen( "./processedData.bin", "rb" );
+
+   if ( fileInHashTable == NULL ) {
+      printf( "Error al leer el archivo 'hashTable.bin'" );
       return -1;
    }
 
-   recordRead_t aux;
-   
-   int i = 0;
-
-   while (!feof(fileIn)) {
-      fread(&aux, sizeof(recordRead_t), 1, fileIn);
-      printf("%d: %d %d %d %f \n", i+1, aux.sourceId, aux.destId, aux.hourOfDay, aux.meanTravelTime);
-      ++i;
+   if ( fileInProcessedData == NULL ) {
+      printf( "Error al leer el archivo 'processedData.bin'" );
+      return -1;
    }
 
-   fclose(fileIn);
+   /*r = fseek( fileInHashTable, ( sourceId - 1 ) * sizeof( int ), SEEK_SET );
+   fread(&hash, sizeof(hash), 1, fileInHashTable);
+   
+   printf("Hash: %d", hash);
+
+   r = fseek( fileInProcessedData, hash * sizeof( recordRead_t ), SEEK_SET );
+   fread( &aux, sizeof( aux ), 1, fileInProcessedData );
+   
+   printf("%d %d %d %f \n", aux.sourceId, aux.destId, aux.hourOfDay, aux.meanTravelTime);*/
+
+   r = fseek( fileInHashTable, ( sourceId - 1 ) * sizeof( int ), SEEK_SET );
+
+   if ( r < 0 ) {
+      perror( "Error al buscar una determinada posición en el archivo 'hashTable.bin'" );
+      return -1;
+   }
+
+   r = fread( &hash, sizeof( hash ), 1, fileInHashTable );
+   
+   if ( r < 0 ) {
+      perror( "Error al leer en el archivo 'hashTable.bin'" );
+      return -1;
+   }
+
+   r = fseek( fileInProcessedData, hash * sizeof( recordRead_t ), SEEK_SET );
+
+   if ( r < 0 ) {
+      perror( "Error al buscar una determinada posición en el archivo 'processedData.bin'" );
+      return -1;
+   }
+
+   do {
+      r = fread( &aux, sizeof( aux ), 1, fileInProcessedData );
+
+      if ( r < 0 ) {
+         perror( "Error al leer en el archivo 'processedData.bin'");
+         return -1;
+      }
+
+      if ( sourceId != aux.sourceId ) {
+         notFound = 1;
+         break;
+      }
+
+   } while ( destId != aux.destId || hod != aux.hourOfDay );
+
+   if ( notFound ) printf("NA");
+   else printf( "Tiempo de viaje medio: %f\n", aux.meanTravelTime );
+
+   fclose( fileInHashTable );
+   fclose( fileInProcessedData );
 
    return 0;
 }
