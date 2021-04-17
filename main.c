@@ -12,7 +12,7 @@ int main () {
    recordRead_t aux;
    
    int i = 1, r, hash;
-   int sourceId = 3, destId = 477, hod = 0;
+   int sourceId = 4, destId = 477, hod = 0;
    int notFound = 0;
 
    fileInHashTable = fopen( "./hashTable.bin", "rb" );
@@ -34,9 +34,7 @@ int main () {
    printf("Hash: %d", hash);
 
    r = fseek( fileInProcessedData, hash * sizeof( recordRead_t ), SEEK_SET );
-   fread( &aux, sizeof( aux ), 1, fileInProcessedData );
-   
-   printf("%d %d %d %f \n", aux.sourceId, aux.destId, aux.hourOfDay, aux.meanTravelTime);*/
+   fread( &aux, sizeof( aux ), 1, fileInProcessedData ); */
 
    r = fseek( fileInHashTable, ( sourceId - 1 ) * sizeof( int ), SEEK_SET );
 
@@ -67,14 +65,16 @@ int main () {
          return -1;
       }
 
-      if ( sourceId != aux.sourceId ) {
+      printf("%d %d %d %f \n", aux.sourceId, aux.destId, aux.hourOfDay, aux.meanTravelTime);
+
+      if ( sourceId != aux.sourceId || !feof( fileInProcessedData ) ) {
          notFound = 1;
          break;
       }
 
    } while ( destId != aux.destId || hod != aux.hourOfDay );
 
-   if ( notFound ) printf("NA");
+   if ( notFound ) printf("NA\n");
    else printf( "Tiempo de viaje medio: %f\n", aux.meanTravelTime );
 
    fclose( fileInHashTable );
