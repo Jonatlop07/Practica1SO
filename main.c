@@ -4,6 +4,9 @@
 #include <sys/types.h>
 #include "record.h"
 
+#define TRUE 1
+#define FALSE 0
+
 int main () {
 
    FILE* fileInHashTable;
@@ -11,9 +14,9 @@ int main () {
    
    recordRead_t aux;
    
-   int i = 1, r, hash;
-   int sourceId = 4, destId = 477, hod = 0;
-   int notFound = 0;
+   int r, hash;
+   int sourceId = 2, destId = 152, hod = 12;
+   int notFound = FALSE;
 
    fileInHashTable = fopen( "./hashTable.bin", "rb" );
    fileInProcessedData = fopen( "./processedData.bin", "rb" );
@@ -27,14 +30,6 @@ int main () {
       printf( "Error al leer el archivo 'processedData.bin'" );
       return -1;
    }
-
-   /*r = fseek( fileInHashTable, ( sourceId - 1 ) * sizeof( int ), SEEK_SET );
-   fread(&hash, sizeof(hash), 1, fileInHashTable);
-   
-   printf("Hash: %d", hash);
-
-   r = fseek( fileInProcessedData, hash * sizeof( recordRead_t ), SEEK_SET );
-   fread( &aux, sizeof( aux ), 1, fileInProcessedData ); */
 
    r = fseek( fileInHashTable, ( sourceId - 1 ) * sizeof( int ), SEEK_SET );
 
@@ -65,10 +60,9 @@ int main () {
          return -1;
       }
 
-      printf("%d %d %d %f \n", aux.sourceId, aux.destId, aux.hourOfDay, aux.meanTravelTime);
-
-      if ( sourceId != aux.sourceId || !feof( fileInProcessedData ) ) {
-         notFound = 1;
+      if ( sourceId != aux.sourceId || feof( fileInProcessedData ) ) {
+         printf("%d", aux.sourceId);
+         notFound = TRUE;
          break;
       }
 
