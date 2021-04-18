@@ -1,119 +1,161 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-//#include "record.h"
+#include "record.h"
 
-#define MAX_SIZE 1000
+#define MAX_LINE_SIZE 150
+#define MAX_SOURCE_ID 1160
+#define MAX_ATTR_NEEDED 4
+#define SOURCE_ID 0
+#define DEST_ID 1
+#define HOD 2
+#define MEAN_TRAV_TIME 3
 
-typedef struct record {
-   int sourceId;
-   int destId;
-   int hourOfDay;
-   float meanTravelTime;
-   struct record *next;
-}record_t;
+void freeLinkedList ( record_t **head ) {
+   record_t *tmp;
 
-typedef struct recordRead {
-   int sourceId;
-   int destId;
-   int hourOfDay;
-   float meanTravelTime;
-}recordRead_t;
+   while ( *head != NULL ) {
+      tmp = *head;
+      *head = (*head)->next;
+      free( tmp );
+   }
+}
 
-//functions
+void addRecord ( record_t **list, record_t newRecord ) {
 
-record_t *addRecord(record_t **list, record_t newRecord){
-   if(*list == NULL){
-      *list = (record_t *) malloc(sizeof(record_t));
+   if ( *list == NULL ) {
+
+      *list = ( record_t * ) malloc( sizeof( record_t ) );
       **list = newRecord;
-   }else{
+
+   } else {
+
       record_t *aux = *list;
 
-      while(aux->next != NULL){
-         aux = aux->next;
-      }
+      while ( aux->next != NULL ) aux = aux->next;
 
-      aux->next = (record_t *) malloc(sizeof(record_t));
+      aux->next = ( record_t * ) malloc( sizeof( record_t ) );
       *aux->next = newRecord;
    }
-   return *list;
 }
+
 
 int main () {
 
+   int totalNumRecords, attrRead, r;
+   int writeProcDataErr = 0;
+
    FILE* fileIn;   
-   FILE* fileOut;
+   FILE* fileOutProcessedData;
+   FILE* fileOutHashTable;
 
-   char line[MAX_SIZE];
+   char line[ MAX_LINE_SIZE ];
    char* token;
-   //fileIn = fopen("./unprocessedData.csv", "r");
-   fileIn = fopen("./hashTableIn.csv", "r");
-   fileOut = fopen("./hashTable.bin", "wb");
+   
+   record_t * hashTable[ MAX_SOURCE_ID ] = { NULL };
+   record_t currRecord; 
+   record_t * temp = ( record_t * ) malloc( sizeof( record_t ) );
+   recordRead_t toWrite;
 
-   if (fileIn == NULL) {
-      printf("Error al leer el archivo 'unprocessedData'");
+   //fileIn = fopen("./unprocessedData.csv", "r");
+   fileIn = fopen( "./hashTableIn.csv", "r" );
+   fileOutProcessedData = fopen( "./processedData.bin", "wb" );
+   fileOutHashTable = fopen( "./hashTable.bin", "wb" );
+
+   if ( fileIn == NULL ) {
+      printf( "Error al leer el archivo 'unprocessedData'" );
       return -1;
    }
 
-   record_t * hashTable[1160] = { NULL };
+   // Read and ignore the line of column names
+   fgets( line, MAX_LINE_SIZE, fileIn );
 
-   while(!feof(fileIn)) {
-      fgets(line, MAX_SIZE, fileIn);
-      token = strtok(line, ",");
+   while( 1 ) {
 
-      record_t currRecord; 
+      fgets( line, MAX_LINE_SIZE, fileIn );
+      
+      if ( feof( fileIn ) ) {
+          break;
+      }
 
-      int j = 0;
+      token = strtok( line, "," );
 
-      while(token != NULL && j <= 3) {
-         switch (j) {
-            case 0:
-               currRecord.sourceId = atoi(token); 
+      attrRead = 0;
+
+      while( token != NULL && attrRead < MAX_ATTR_NEEDED ) {
+
+         switch ( attrRead ) {
+            case SOURCE_ID:
+               currRecord.sourceId = atoi( token ); 
                break;
-            case 1:
-               currRecord.destId = atoi(token);
+            case DEST_ID:
+               currRecord.destId = atoi( token );
                break;
-            case 2:
-               currRecord.hourOfDay = atoi(token);
+            case HOD:
+               currRecord.hourOfDay = atoi( token );
                break;
-            case 3:
-               currRecord.meanTravelTime = atol(token);
+            case MEAN_TRAV_TIME:
+               currRecord.meanTravelTime = atol( token );
                break;
          }
 
          currRecord.next = NULL;
 
-         token = strtok(NULL, ",");
+         token = strtok( NULL, "," );
 
-         ++j;
-
+         ++attrRead;
       }
 
-      record_t *currList = addRecord(&hashTable[currRecord.sourceId - 1], currRecord);
-
+      addRecord( &hashTable[ currRecord.sourceId - 1 ], currRecord );
    }
-   for(int i=0;i<1160;i++){
-      record_t *temp = hashTable[i];
 
-      int j = 1;
+   totalNumRecords = 0;
 
-      while(temp != NULL) {
-         printf("(%d, %d): %d %d %d %f\n", i+1, j, temp->sourceId, temp->destId, temp->hourOfDay, temp->meanTravelTime);
+   for( int currSourceId = 1; currSourceId <= MAX_SOURCE_ID; ++currSourceId ) {
+      
+      temp = hashTable[ currSourceId - 1 ];
+      
+      r = fwrite( &totalNumRecords, sizeof(totalNumRecords), 1, fileOutHashTable );
+      
+      if ( r <= 0 ) {
+         perror( "Error al escribir en el archivo 'hashTable.bin'" );
+         break;
+      }
 
-         recordRead_t toWrite;
+      while( temp != NULL ) {
+
          toWrite.sourceId = temp->sourceId;
          toWrite.destId = temp->destId;
          toWrite.hourOfDay = temp->hourOfDay;
          toWrite.meanTravelTime = temp->meanTravelTime;
 
-         fwrite(&toWrite, sizeof(toWrite), 1, fileOut);
+         r = fwrite( &toWrite, sizeof( toWrite ), 1, fileOutProcessedData );
+
+         if ( r <= 0 ) {
+            perror( "Error al escribir en el archivo 'processedData.bin'" );
+            writeProcDataErr = 1;             
+            break;
+         }
+
          temp = temp->next;
-         ++j;
+         ++totalNumRecords;
+      }
+
+      if ( writeProcDataErr ) {
+         break;
       }
    }
 
+   for ( int i = 0; i < MAX_SOURCE_ID; ++i ) {
+      freeLinkedList( &hashTable[ i ] );
+      free( hashTable[ i ] ); 
+   }
+   
+   free( temp );
+
    fclose( fileIn );
-   fclose( fileOut );
+   fclose( fileOutProcessedData );
+   fclose( fileOutHashTable );
 
    return 0;
 }
