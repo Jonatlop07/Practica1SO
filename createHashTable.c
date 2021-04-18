@@ -57,8 +57,8 @@ int main () {
    record_t * temp = ( record_t * ) malloc( sizeof( record_t ) );
    recordRead_t toWrite;
 
-   //fileIn = fopen("./unprocessedData.csv", "r");
-   fileIn = fopen( "./hashTableIn.csv", "r" );
+   fileIn = fopen("./unprocessedData.csv", "r");
+   //fileIn = fopen( "./hashTableIn.csv", "r" );
    fileOutProcessedData = fopen( "./processedData.bin", "wb" );
    fileOutHashTable = fopen( "./hashTable.bin", "wb" );
 
@@ -95,7 +95,7 @@ int main () {
                currRecord.hourOfDay = atoi( token );
                break;
             case MEAN_TRAV_TIME:
-               currRecord.meanTravelTime = atol( token );
+               currRecord.meanTravelTime = atof( token );
                break;
          }
 

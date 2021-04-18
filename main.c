@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include "record.h"
+#include <sys/shm.h>
 
 #define TRUE 1
 #define FALSE 0
@@ -17,7 +18,30 @@ int main () {
    int r, hash;
    int sourceId = 3, destId = 478, hod = 0;
    int notFound = FALSE;
+   key_t key = 1234;
+   int IdMemory;
+   int *memory = NULL;
+   //listen
+   do{
+      IdMemory = shmget (key, 3*sizeof(int), 0666 );
+      if (IdMemory == -1){
+         printf( "\nfallo en shmget\n");
+      	 sleep(1);
+      }
+   }while(IdMemory == -1);
 
+   memory = (int *)shmat (IdMemory, 0, 0);
+   if (memory == NULL){
+      printf( "\nfallo en shmat\n" );
+      exit(0);
+   }
+   sourceId = *memory;
+   destId = *(memory+1);
+   hod = *(memory+2); 
+
+   if (IdMemory != -1){
+     shmdt ((char *)memory);
+   }
    fileInHashTable = fopen( "./hashTable.bin", "rb" );
    fileInProcessedData = fopen( "./processedData.bin", "rb" );
 
@@ -68,7 +92,7 @@ int main () {
    } while ( destId != aux.destId || hod != aux.hourOfDay );
 
    if ( notFound ) printf( "NA\n" );
-   else printf( "Tiempo de viaje medio: %f\n", aux.meanTravelTime );
+   else printf( "\n\n Tiempo de viaje medio: %.3f \n", aux.meanTravelTime );
 
    fclose( fileInHashTable );
    fclose( fileInProcessedData );
