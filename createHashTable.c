@@ -58,7 +58,6 @@ int main () {
    recordRead_t toWrite;
 
    fileIn = fopen("./unprocessedData.csv", "r");
-   //fileIn = fopen( "./hashTableIn.csv", "r" );
    fileOutProcessedData = fopen( "./processedData.bin", "wb" );
    fileOutHashTable = fopen( "./hashTable.bin", "wb" );
 
