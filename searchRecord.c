@@ -15,33 +15,41 @@ int main () {
    
    recordRead_t aux;
    
-   int r, hash;
-   int sourceId = 3, destId = 478, hod = 0;
+   int r, hash, sourceId, destId, hourOfDay;
    int notFound = FALSE;
+
    key_t key = 1234;
-   int IdMemory;
+
+   int memoryId;
    int *memory = NULL;
+
    //listen
+
    do{
-      IdMemory = shmget (key, 3*sizeof(int), 0666 );
-      if (IdMemory == -1){
+      memoryId = shmget( key, 3 * sizeof( int ), 0666 );
+
+      if ( memoryId == -1 ) {
          printf( "\nfallo en shmget\n" );
-      	 sleep(1);
+      	 sleep( 1 );
       }
-   }while(IdMemory == -1);
 
-   memory = (int *)shmat (IdMemory, 0, 0);
-   if (memory == NULL){
+   } while ( memoryId == -1 );
+
+   memory = ( int * ) shmat( memoryId, 0, 0 );
+
+   if ( memory == NULL ) {
       printf( "\nfallo en shmat\n" );
-      exit(0);
+      exit( 0 );
    }
-   sourceId = *memory;
-   destId = *(memory+1);
-   hod = *(memory+2); 
 
-   if (IdMemory != -1){
-     shmdt ((char *)memory);
+   sourceId = *memory;
+   destId = *( memory + 1 );
+   hourOfDay = *( memory + 2 ); 
+
+   if ( memoryId != -1 ){
+     shmdt( ( char * ) memory );
    }
+
    fileInHashTable = fopen( "./hashTable.bin", "rb" );
    fileInProcessedData = fopen( "./processedData.bin", "rb" );
 
@@ -89,7 +97,7 @@ int main () {
          break;
       }
 
-   } while ( destId != aux.destId || hod != aux.hourOfDay );
+   } while ( destId != aux.destId || hourOfDay != aux.hourOfDay );
 
    if ( notFound ) printf( "NA\n" );
    else printf( "\n\n Tiempo de viaje medio: %.3f \n", aux.meanTravelTime );
