@@ -12,34 +12,43 @@
 #define MID_TRAVEL_TIME 4
 #define EXIT 5
 
-int IdMemory;
-key_t key =1234;
-int *memory=NULL;
+//Global variables for the shared memory comunication between unparented processes
 
+int memoryId;
 
-int sendData(int source, int dest , int hour){
+key_t key = 1234;
+
+int *memory = NULL;
+
+int sendData( int sourceId, int destId, int hourOfDay ) {
   
-   IdMemory = shmget (key, 3*sizeof(int), 0666 | IPC_CREAT);
-   if (IdMemory == -1){
+   memoryId = shmget( key, 3 * sizeof( int ), 0666 | IPC_CREAT );
+
+   if ( memoryId == -1 ) {
      printf( "\nfallo en el shmget\n" );
-     return (1);
+     return 1;
    }
-   memory = (int *)shmat (IdMemory, 0, 0);
-   if (memory == NULL){
+
+   memory = ( int * ) shmat( memoryId, 0, 0 );
+
+   if ( memory == NULL ) {
      printf ( "\nfallo en el shmat\n" );
-     return (1);
+     return 1;
    }
-   *memory = source;
-   *(memory+1) = dest;
-   *(memory+2) = hour;
-   return (0);
+
+   *memory = sourceId;
+   *( memory + 1 ) = destId;
+   *( memory + 2 ) = hourOfDay;
+
+   return 0;
 }
 
 int main () {
-   int option, source = 0, dest = 0, hour = 0;
+
+   int option, sourceId = 0, destId = 0, hourOfDay = 0;
    
    do {
-      system("clear");
+      system( "clear" );
       printf( "Bienvenido (UwU)\n\n" );
       printf( "Menu:\n");
       printf( "1. Ingresar origen\n" );
@@ -52,51 +61,51 @@ int main () {
       
       switch ( option ) {
          case ORIGIN_INPUT:
-	    system("clear");
-	    printf( "\nIngrese ID del origen:  " );
-	    scanf( "%i", &source );
+	         system( "clear" );
+	         printf( "\nIngrese ID del origen:  " );
+	         scanf( "%i", &sourceId );
             break;
-
-	 case DEST_INPUT:
-	    system("clear");
+	      case DEST_INPUT:
+	         system( "clear" );
             printf( "\nIngrese ID del destino:  " );
-	    scanf( "%i", &dest );
+	         scanf( "%i", &destId );
             break;
-
-	 case HOUR_INPUT:
-	    system("clear");
+	      case HOUR_INPUT:
+	         system( "clear" );
             printf( "\nIngrese hora del dia:  " );
-	    scanf( "%i", &hour );
+	         scanf( "%i", &hourOfDay );
             break;
-
-	 case MID_TRAVEL_TIME:
-	    system("clear");
+	      case MID_TRAVEL_TIME:
+	         system( "clear" );
             clock_t begin, end;
-            begin=clock();
-	    if(sendData(source,dest,hour)==0){
-	       system("./searchRecord");
-               end=clock();
-               double duration = (double) (end-begin)/CLOCKS_PER_SEC;
-               printf("\n\nLa busqueda tomo %2.6f segundos.\n", duration );
-	       printf("\nPresione Enter para continuar");
-	       getchar();
-	       getchar();
-	    }
+            begin = clock();
 
-	    break;
+	         if( sendData( sourceId, destId, hourOfDay ) == 0 ){
+	            system( "./searchRecord" );
 
-	 case EXIT:
-            shmdt ((char *)memory);
-            shmctl (IdMemory, IPC_RMID, (struct shmid_ds *)NULL);
-            printf( "\nHasta luego (UwU)  \n" );
-	    exit ( 0 );
-	    break;
+               end = clock();
 
+               double duration = ( double ) ( end - begin ) / CLOCKS_PER_SEC;
+
+               printf( "\n\nLa busqueda tomo %2.6f segundos.\n", duration );
+	            printf( "\nPresione Enter para continuar" );
+
+	            getchar();
+	            getchar();
+	         }
+
+	         break;
+	      case EXIT:
+            shmdt( ( char * ) memory );
+            shmctl( memoryId, IPC_RMID, ( struct shmid_ds * ) NULL );
+            printf( "\nHasta luego (UwU)\n" );
+	         exit ( 0 );
+	         break;
          default:
-	    printf("\nError, vuelva a digitar la opcion\n");
-	    getchar();
-	    getchar();
-	    break;
+	         printf( "\nError, vuelva a digitar la opcion\n" );
+	         getchar();
+	         getchar();
+	         break;
       }
 
    } while ( 1 );
