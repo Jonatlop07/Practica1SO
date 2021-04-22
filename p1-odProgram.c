@@ -64,41 +64,44 @@ int main () {
 	         system( "clear" );
 	         printf( "\nIngrese ID del origen:  " );
 	         scanf( "%i", &sourceId );
-            break;
-	      case DEST_INPUT:
+		 break;
+
+	 case DEST_INPUT:
 	         system( "clear" );
-            printf( "\nIngrese ID del destino:  " );
+                 printf( "\nIngrese ID del destino:  " );
 	         scanf( "%i", &destId );
-            break;
-	      case HOUR_INPUT:
+                 break;
+
+	 case HOUR_INPUT:
 	         system( "clear" );
-            printf( "\nIngrese hora del dia:  " );
+		 printf( "\nIngrese hora del dia:  " );
 	         scanf( "%i", &hourOfDay );
-            break;
-	      case MID_TRAVEL_TIME:
+		 break;
+
+	 case MID_TRAVEL_TIME:
 	         system( "clear" );
-            clock_t begin, end;
-            begin = clock();
+		 clock_t begin, end;
+		 begin = clock();
 
 	         if( sendData( sourceId, destId, hourOfDay ) == 0 ){
 	            system( "./searchRecord" );
 
-               end = clock();
+		    end = clock();
 
-               double duration = ( double ) ( end - begin ) / CLOCKS_PER_SEC;
+		    double duration = ( double ) ( end - begin ) / CLOCKS_PER_SEC;
 
-               printf( "\n\nLa busqueda tomo %2.6f segundos.\n", duration );
+		    printf( "\n\nLa busqueda tomo %2.6f segundos.\n", duration );
 	            printf( "\nPresione Enter para continuar" );
 
 	            getchar();
 	            getchar();
 	         }
-
 	         break;
-	      case EXIT:
-            shmdt( ( char * ) memory );
-            shmctl( memoryId, IPC_RMID, ( struct shmid_ds * ) NULL );
-            printf( "\nHasta luego (UwU)\n" );
+
+	 case EXIT:
+		 shmdt( ( char * ) memory );
+		 shmctl( memoryId, IPC_RMID, ( struct shmid_ds * ) NULL );
+		 printf( "\nHasta luego (UwU)\n" );
 	         exit ( 0 );
 	         break;
          default:
@@ -106,6 +109,7 @@ int main () {
 	         getchar();
 	         getchar();
 	         break;
+
       }
 
    } while ( 1 );

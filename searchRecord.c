@@ -18,12 +18,12 @@ int main () {
    int r, hash, sourceId, destId, hourOfDay;
    int notFound = FALSE;
 
+   // variables for the shared memory comunication
    key_t key = 1234;
-
    int memoryId;
    int *memory = NULL;
 
-   //listen
+   //listen shared Memory
 
    do{
       memoryId = shmget( key, 3 * sizeof( int ), 0666 );
@@ -84,6 +84,7 @@ int main () {
       return -1;
    }
 
+   //search algorithm
    do {
       r = fread( &aux, sizeof( aux ), 1, fileInProcessedData );
 
